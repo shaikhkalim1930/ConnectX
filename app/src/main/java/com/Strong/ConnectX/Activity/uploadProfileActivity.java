@@ -11,6 +11,8 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,15 +31,12 @@ import java.util.Objects;
 public class uploadProfileActivity extends AppCompatActivity {
 
     ActivityProfileBinding BindProfile;
-    //Uri Indicates where the image wil be picked from!
     private Uri filePath;
-
-    //Request Code
-    private final int PICK_IMAGE_REQUEST = 22;
-    //Firebase Instance
     StorageReference storageReference;
     private FirebaseAuth mAuth;
     String username, email, pass, id;
+
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +45,33 @@ public class uploadProfileActivity extends AppCompatActivity {
         BindProfile = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(BindProfile.getRoot());
 
+        // Retrieve data from intent
         username = getIntent().getStringExtra(Constants.KEY_USERNAME);
         email = getIntent().getStringExtra(Constants.KEY_EMAIL);
         pass = getIntent().getStringExtra(Constants.KEY_PASSWORD);
         id = getIntent().getStringExtra(Constants.KEY_ID);
 
+        // Initialize ActivityResultLauncher
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        filePath = result.getData().getData();
+                        try {
+                            BindProfile.pickImage.setVisibility(View.INVISIBLE);
+                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                            BindProfile.newProfileImage.setImageBitmap(bitmap);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
+
+        // Image selection
         BindProfile.newProfileImage.setOnClickListener(view -> SelectImage());
 
-
+        // Upload button
         BindProfile.uploadProfile.setOnClickListener(view -> {
             try {
                 uploadImage();
@@ -67,24 +85,7 @@ public class uploadProfileActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(ACTION_GET_CONTENT);
-        startActivityForResult(createChooser(intent, "Select Image From Here"), PICK_IMAGE_REQUEST);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            //get The Uri of Data
-            filePath = data.getData();
-            //Setting image on imageview using bitmap
-            try {
-                BindProfile.pickImage.setVisibility(View.INVISIBLE);
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                BindProfile.newProfileImage.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        imagePickerLauncher.launch(createChooser(intent, "Select Image From Here"));
     }
 
     private void uploadImage() throws IOException {
@@ -92,7 +93,6 @@ public class uploadProfileActivity extends AppCompatActivity {
             showToast("Uploading Profile Pic");
             visibility(true);
 
-            //Storing Image String to The Database
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             storageReference = FirebaseStorage.getInstance().getReference();
 
@@ -103,7 +103,6 @@ public class uploadProfileActivity extends AppCompatActivity {
 
             mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-
                     String id = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
                     storageReference = storageReference.child("ProfileImages/" + id);
 
@@ -118,24 +117,21 @@ public class uploadProfileActivity extends AppCompatActivity {
                             database.getReference().child("Users").child(id).setValue(hashMap);
                             showToast("Image Uploaded!");
                         });
+
                         showToast("Welcome " + username + " PersonalChat.");
                         Intent intent = new Intent(uploadProfileActivity.this, recentActivity.class);
                         startActivity(intent);
                     }).addOnFailureListener(e -> {
                         visibility(false);
-                        showToast("Failed" + e.getMessage());
+                        showToast("Failed: " + e.getMessage());
                     });
                 } else {
-                    // Registration failed
                     showToast(Objects.requireNonNull(task.getException()).getMessage());
                 }
             });
+        } else {
+            showToast("Please select an image first.");
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 
     private void showToast(String message) {
@@ -150,5 +146,10 @@ public class uploadProfileActivity extends AppCompatActivity {
             BindProfile.profileProgress.setVisibility(View.INVISIBLE);
             BindProfile.uploadProfile.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

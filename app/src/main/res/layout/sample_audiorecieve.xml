@@ -17,27 +17,27 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints">
 
-        <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
-            android:id="@+id/RecVoicePlayerView"
-            android:layout_width="260dp"
-            android:layout_height="wrap_content"
-            app:enableVisualizer="true"
-            app:playPauseBackgroundColor="#0F8BED"
-            app:playPauseCornerRadius="100"
-            app:playProgressbarColor="#0F8BED"
-            app:progressTimeColor="#000"
-            app:seekBarProgressColor="#000"
-            app:seekBarThumbColor="#11A4DD"
-            app:shareBackgroundColor="#0F8BED"
-            app:shareCornerRadius="100"
-            app:shareText="SHARE ME"
-            app:showShareButton="false"
-            app:showTiming="true"
-            app:timingBackgroundColor="#8611A4DD"
-            app:viewBackground="#C6C4CF"
-            app:viewCornerRadius="100"
-            app:visualizationNotPlayedColor="#727171"
-            app:visualizationPlayedColor="#ff7700" />
+<!--        <me.jagar.chatvoiceplayerlibrary.VoicePlayerView-->
+<!--            android:id="@+id/RecVoicePlayerView"-->
+<!--            android:layout_width="260dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:enableVisualizer="true"-->
+<!--            app:playPauseBackgroundColor="#0F8BED"-->
+<!--            app:playPauseCornerRadius="100"-->
+<!--            app:playProgressbarColor="#0F8BED"-->
+<!--            app:progressTimeColor="#000"-->
+<!--            app:seekBarProgressColor="#000"-->
+<!--            app:seekBarThumbColor="#11A4DD"-->
+<!--            app:shareBackgroundColor="#0F8BED"-->
+<!--            app:shareCornerRadius="100"-->
+<!--            app:shareText="SHARE ME"-->
+<!--            app:showShareButton="false"-->
+<!--            app:showTiming="true"-->
+<!--            app:timingBackgroundColor="#8611A4DD"-->
+<!--            app:viewBackground="#C6C4CF"-->
+<!--            app:viewCornerRadius="100"-->
+<!--            app:visualizationNotPlayedColor="#727171"-->
+<!--            app:visualizationPlayedColor="#ff7700" />-->
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
